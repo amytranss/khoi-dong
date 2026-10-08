@@ -52,7 +52,9 @@ http.createServer((req,res)=>{
       send(res,404,{});});
   }
   const f=p==='/'?'index.html':p==='/s'?'s.html':p.slice(1);
-  const fp=path.join(__dirname,'public',path.basename(f));
-  fs.readFile(fp,(e,d)=>{if(e){res.writeHead(404);return res.end('404')}res.writeHead(200,{'Content-Type':types[path.extname(fp)]||'text/plain'});res.end(d)});
+  const nm=path.basename(f),cands=[path.join(__dirname,'public',nm),path.join(__dirname,nm)];
+  const fp=cands.find(x=>fs.existsSync(x)&&['.html','.css'].includes(path.extname(x)));
+  if(!fp){res.writeHead(404,{'Content-Type':'text/plain;charset=utf-8'});return res.end('404 - Không tìm thấy file giao diện (index.html, s.html, app.css). Hãy kiểm tra các file đã được tải lên GitHub.')}
+  fs.readFile(fp,(e,d)=>{if(e){res.writeHead(500);return res.end('500')}res.writeHead(200,{'Content-Type':types[path.extname(fp)]});res.end(d)});
 }).listen(PORT,'0.0.0.0',()=>{console.log('\n⚡ TĂNG TỐC đang chạy!\n  Giáo viên: http://localhost:'+PORT);
   ips().forEach(i=>console.log('  Học sinh (iPad): http://'+i+':'+PORT+'/s'))});
